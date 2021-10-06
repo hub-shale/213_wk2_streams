@@ -1,0 +1,64 @@
+---
+title: "USGS Stream Data Project"
+author: "Shale"
+date: "10/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dataRetrieval)
+library(metajam)
+library(here)
+```
+
+## Ventura River data for this week
+
+```{r}
+Ventura_RO = readNWISdv(siteNumbers = 11118500, parameterCd = c("00060", "00065"), startDate = "2021-10-01", endDate = "2021-10-05") %>% 
+  renameNWISColumns()
+
+
+ggplot(Ventura_RO, aes(x= Date, y= Flow)) +
+  geom_point()
+```
+
+```{r, echo=FALSE}
+bbox_sites = whatNWISsites(bBox=c(-83.0,36.5,-81.0,38.5), 
+                      parameterCd=c("00010","00060"),
+                      hasDataTypeCd="dv")
+```
+
+## metajam
+
+```{r}
+alaska_data_obj = download_d1_data(data_url = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3A7fc6f6db-c5ea-426a-a743-1f2edafb43b8", path = here())
+
+alaska_data = read_d1_files(folder_path = here())
+
+# returned error:
+
+# Error in h(simpleError(msg, call)) : error in evaluating the argument 'x' in selecting a method for function 'query': SSL certificate problem: certificate has expired
+
+# when trying to download data
+```
+## Manual attempt bc of SSL error
+
+```{r}
+alaska_data_m = read_csv(here("manual/household_language.csv"))
+```
+
+```{r}
+english_only = alaska_data_m %>% 
+  group_by(Year) %>% 
+  summarise(total_English_only = sum(speak_only_english)) %>% 
+  filter(Year >= 2009)
+
+ggplot(english_only, aes(x= Year, y= total_English_only)) +
+  geom_line() +
+  geom_point(color = "red") +
+  labs(title = "Total Number of Alaskans speaking only English by year, 2009-2015")
+```
+
