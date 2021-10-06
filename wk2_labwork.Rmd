@@ -17,12 +17,28 @@ library(here)
 ## Ventura River data for this week
 
 ```{r}
-Ventura_RO = readNWISdv(siteNumbers = 11118500, parameterCd = c("00060", "00065"), startDate = "2021-10-01", endDate = "2021-10-05") %>% 
-  renameNWISColumns()
+# readNWISdv() is for daily values, readNWISunv() is for smaller time intervals (15 min)
 
+SB_creeks = readNWISuv(siteNumbers = c(11118500, 11113500), parameterCd = c("00060", "00065"), startDate = "2021-10-03", endDate = "2021-10-05", tz = "America/Los_Angeles") %>% 
+  renameNWISColumns() 
 
-ggplot(Ventura_RO, aes(x= Date, y= Flow)) +
-  geom_point()
+# It seems that the simplest way to query multiple sites is to just create a vector of site ids to use as input to the `readNWISdv()` function.
+
+ggplot(SB_creeks, aes(x= dateTime, y= Flow_Inst)) +
+  geom_point(aes(color = site_no, shape = site_no))
+#  scale_fill_discrete(name = "Creek Site", labels = c("Santa Paula Creek", "Ventura River"))
+
+# The Ventura River (site 11118500) is probably dammed, because during the time of the storm (and expected flow surge) the flow plateaued at 1.08 cubic feet per second. Looking at longitudinal data for the same site shows this as a recurring ceiling, which hints at a restrictive feature such as a dam.
+
+# Santa Paula Creek (site 11113500), on the other hand, has a distinct apex on Tuesday morning following the storm of Monday night. This is obvious visually on the graph, but can be pinpointed exactly with the code below.
+
+V_max = SB_creeks %>% 
+  filter(site_no == 11113500) %>% 
+  filter(Flow_Inst == max(Flow_Inst))
+  
+print(V_max$dateTime)  
+
+# Shows that discharge of Santa Paula Creek at the monitoring station peaked between 3:30AM and 4:15AM of October 5th.
 ```
 
 ```{r, echo=FALSE}
@@ -60,5 +76,21 @@ ggplot(english_only, aes(x= Year, y= total_English_only)) +
   geom_line() +
   geom_point(color = "red") +
   labs(title = "Total Number of Alaskans speaking only English by year, 2009-2015")
+```
+
+And in French
+
+```{r}
+# "French" isn't defined in the question as it relates to the possible columns in the df, so I chose to use the `french_incl_patois_cajun` variable.
+french_lang = alaska_data_m %>% 
+  group_by(Year) %>% 
+  summarise(total_french = sum(french_incl_patois_cajun)) %>% 
+  filter(Year >= 2009)
+
+ggplot(french_lang, aes(x= Year, y= total_french)) +
+  geom_line() +
+  geom_point(color = "red") +
+  labs(title = "Total Number of Alaskans speaking French 
+(including Patois/Cajun) by year, 2009-2015")
 ```
 
