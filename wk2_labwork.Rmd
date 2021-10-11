@@ -17,7 +17,7 @@ library(here)
 ## Ventura River data for this week
 
 ```{r}
-# readNWISdv() is for daily values, readNWISunv() is for smaller time intervals (15 min)
+# readNWISdv() is for daily values, readNWISuv() is for smaller time intervals (15 min)
 
 SB_creeks = readNWISuv(siteNumbers = c(11118500, 11113500), parameterCd = c("00060", "00065"), startDate = "2021-10-03", endDate = "2021-10-05", tz = "America/Los_Angeles") %>% 
   renameNWISColumns() 
@@ -69,13 +69,13 @@ alaska_data_m = read_csv(here("manual/household_language.csv"))
 ```{r}
 english_only = alaska_data_m %>% 
   group_by(Year) %>% 
-  summarise(total_English_only = sum(speak_only_english)) %>% 
+  summarise(pct_English_only = 100 * (sum(speak_only_english) / sum(total))) %>% 
   filter(Year >= 2009)
 
-ggplot(english_only, aes(x= Year, y= total_English_only)) +
+ggplot(english_only, aes(x= Year, y= pct_English_only)) +
   geom_line() +
   geom_point(color = "red") +
-  labs(title = "Total Number of Alaskans speaking only English by year, 2009-2015")
+  labs(title = "Percent of Alaskans speaking only English by year, 2009-2015")
 ```
 
 And in French
@@ -84,13 +84,13 @@ And in French
 # "French" isn't defined in the question as it relates to the possible columns in the df, so I chose to use the `french_incl_patois_cajun` variable.
 french_lang = alaska_data_m %>% 
   group_by(Year) %>% 
-  summarise(total_french = sum(french_incl_patois_cajun)) %>% 
+  summarise(pct_french = 100 * (sum(french_incl_patois_cajun) / sum(total))) %>% 
   filter(Year >= 2009)
 
-ggplot(french_lang, aes(x= Year, y= total_french)) +
+ggplot(french_lang, aes(x= Year, y= pct_french)) +
   geom_line() +
   geom_point(color = "red") +
-  labs(title = "Total Number of Alaskans speaking French 
+  labs(title = "Percent of Alaskans speaking French 
 (including Patois/Cajun) by year, 2009-2015")
 ```
 
