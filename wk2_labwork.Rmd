@@ -52,6 +52,9 @@ bbox_sites = whatNWISsites(bBox=c(-83.0,36.5,-81.0,38.5),
 ```{r}
 alaska_data_obj = download_d1_data(data_url = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3A7fc6f6db-c5ea-426a-a743-1f2edafb43b8", path = here())
 
+# Works on Taylor, but not on my laptop. Error message:
+# Error in h(simpleError(msg, call)) : error in evaluating the argument 'x' in selecting a method for function 'query': SSL certificate problem: certificate has expired
+
 alaska_data = read_d1_files(folder_path = alaska_data_obj)
 
 alaska_df = alaska_data$data
@@ -59,7 +62,7 @@ alaska_df = alaska_data$data
 
 ## Manual attempt bc of SSL error
 
-Error resolved - metajam is working for me now, so everything done below with `alaska_data_m` (manual download) could be repeated identically with the same data using `metajam`, which is now stored in `alaska_df` above.
+Error resolved on Taylor, but not on my personal computer - metajam is working for me now on Taylor, but I am still getting an SSL error when I try to run `alaska_data_obj =` on my laptop. Everything done below with `alaska_data_m` (manual download) could be repeated identically with the same data using `metajam`, which is now stored in `alaska_df` above.
 
 ```{r}
 alaska_data_m = read_csv(here("manual/household_language.csv"))
